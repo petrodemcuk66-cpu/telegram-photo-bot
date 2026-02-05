@@ -6,7 +6,7 @@ from PIL import Image, ImageFilter , ImageEnhance , ImageDraw
 import os
 import uuid
 
-TOKEN = os.getenv("8495336542:AAEizshCNjKWehppbjMqf_cWmcdihiFtam4")
+TOKEN = os.getenv("BOT_TOKEN")
 if not TOKEN: raise ValueError("❌ BOT_TOKEN не заданий у змінних середовища")
 
 bot = telebot.TeleBot(TOKEN)
