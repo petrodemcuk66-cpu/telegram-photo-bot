@@ -1,0 +1,69 @@
+# Windows system files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+ntuser.dat*
+ntuser.ini
+*.TM.blf
+*.regtrans-ms
+*.log
+
+# OneDrive
+OneDrive/
+*.pptx
+*.docx
+*.xlsx
+*.accdb
+*.url
+
+# IDEs
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+*.pyc
+__pycache__/
+*.egg-info/
+*.venv/
+.venv/
+
+# PyCharm
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.orig
+*.tmp
+*.bak
+*.log
+*.DS_Store
+
+# Visual Studio
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+*.vs/
+*.VC.opendb
+
+# VirtualBox
+*.vbox
+*.vbox-prev
+*.vdi
+*.vdi-prev
+.VirtualBox/
+
+# Misc
+Downloads/
+Documents/
+Music/
+Videos/
+Pictures/
+3D Objects/
+Contacts/
+Favorites/
+AppData/
