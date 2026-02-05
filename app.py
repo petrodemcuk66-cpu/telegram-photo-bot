@@ -7,8 +7,7 @@ import os
 import uuid
 
 TOKEN = os.getenv("8495336542:AAEizshCNjKWehppbjMqf_cWmcdihiFtam4")
-if not TOKEN:
-    raise ValueError("❌ BOT_TOKEN не заданий у змінних середовища")
+if not TOKEN: raise ValueError("❌ BOT_TOKEN не заданий у змінних середовища")
 
 bot = telebot.TeleBot(TOKEN)
 
