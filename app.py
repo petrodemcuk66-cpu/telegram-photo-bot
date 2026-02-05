@@ -7,7 +7,10 @@ import os
 import uuid
 
 TOKEN = os.getenv("8495336542:AAEizshCNjKWehppbjMqf_cWmcdihiFtam4")
-bot = telebot.TeleBot(TOKEN, parse_mode=None)
+if not TOKEN:
+    raise ValueError("❌ BOT_TOKEN не заданий у змінних середовища")
+
+bot = telebot.TeleBot(TOKEN)
 
 PHOTO_DIR = "photos"
 os.makedirs(PHOTO_DIR, exist_ok=True)
