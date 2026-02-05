@@ -2,11 +2,11 @@ import telebot
 from PIL.ImageFile import ImageFile
 from PIL.ImageMath import lambda_eval
 from telebot import types
-from PIL import Image, ImageFilter , ImageEnhance
+from PIL import Image, ImageFilter , ImageEnhance , ImageDraw
 import os
 import uuid
 
-TOKEN = "8495336542:AAEizshCNjKWehppbjMqf_cWmcdihiFtam4"
+TOKEN = os.getenv("8495336542:AAEizshCNjKWehppbjMqf_cWmcdihiFtam4")
 bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
 PHOTO_DIR = "photos"
@@ -17,8 +17,11 @@ user_photos = {}
 
 def main_keyboard():
     kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    kb.add("Блюр", "Чорно-білий")
-    kb.add("Контраст")
+    kb.add("Блюр", "Сильеий блюр")
+    kb.add("Чорно-білий","Сепія")
+    kb.add("Контраст", "Яскравість")
+    kb.add("Різкість", "Дзеркало")
+    kb.add("Скинути")
     return kb
 
 
@@ -33,31 +36,34 @@ def start(message):
 #отриманння фот
 @bot.message_handler(content_types=['photo'])
 def get_photo(message):
+    try:
         file_id = message.photo[-1].file_id
         file_info = bot.get_file(file_id)
         downloaded = bot.download_file(file_info.file_path)
 
-        path = f"{message.chat.id}.jpg"
+        path = os.path.join(PHOTO_DIR, f"{message.chat.id}.jpg")
         with open(path, "wb") as f:
             f.write(downloaded)
 
         user_photos[message.chat.id] = path
         bot.send_message(message.chat.id, "Фото отримано.  Обирай філтьр")
+    except:
+        bot.send_message(message.chat.id , "Помилка при завантаженні фото")
 
-#blur
-@bot.message_handler(func=lambda m: m.text == "Блюр")
-def blur_photo(message):
-    apply_filter(message, "blur")
 
-#чорний-білий
-@bot.message_handler(func=lambda m: m.text == "Чорно-білий")
-def bw_photo(message):
-    apply_filter(message , "bw")
+@bot.message_handler(func=lambda m: m.text in [
+    "Блюр", "Сильний блюр" , "Чорно-білий" , "Сепія",
+    "Контраст", "Яскравість", "Різкість", "Дзеркало"
+])
+def filters(message):
+    apply_filter(message, message.text)
 
-#контраст
-@bot.message_handler(func=lambda m: m.text == "Контраст")
-def contrast_photo(message):
-    apply_filter(message, "contrast")
+@bot.message_handler(func=lambda m: m.text == "Скинути")
+def reset(message):
+    path = user_photos.pop(message.chat.id, None)
+    if path and os.path.exists(path):
+        os.remove(path)
+    bot.send_message(message.chat.id, "Фото скинуто. Наділши нове")
 
 def apply_filter(message, mode):
     chat_id = message.chat.id
@@ -66,25 +72,47 @@ def apply_filter(message, mode):
         bot.send_message(chat_id, "Спочатку надішли фото")
         return
 
-    img = Image.open(user_photos[chat_id]).convert("RGB")
+    try:
+        img = Image.open(user_photos[chat_id]).convert("RGB")
 
-    if mode == "blur":
-        img = img.filter(ImageFilter.BLUR)
+        if mode == "Блюр":
+            img = img.filter(ImageFilter.BLUR)
 
-    elif mode == "bw":
-        img = img.convert("L")
+        elif mode == "Сильний блюр":
+            img = img.filter(ImageFilter.GaussianBlur(5))
 
-    elif mode == "contrast":
-        enhancer = ImageEnhance.Contrast(img)
-        img = enhancer.enhance(2)
+        elif mode == "Чорний-білий":
+            img = img.convert("L")
 
-    out = f"{chat_id}_out.jpg"
-    img.save(out)
+        elif mode == "Контраст":
+            img = ImageEnhance.Contrast(img).enhance(2)
 
-    with open(out, "rb") as f:
-        bot.send_photo(chat_id, f)
+        elif mode == "Яскравість":
+            img = ImageEnhance.Brightness(img).enhance(1.5)
 
-    os.remove(out)
+        elif mode == "Дзеркало":
+            img = img.transform(Image.FLIP_LEFT_RIGHT)
+
+        elif mode == "Сепія":
+            gray = img.convert("L")
+            img = Image.merge(
+                "RGB",
+                (
+                    gray.point(lambda x: x * 1.1),
+                    gray.point(lambda x: x * 0.9),
+                    gray.point(lambda x: x * 0.7),
+                )
+            )
+
+        out_path = os.path.join(PHOTO_DIR, f"{chat_id}_out.jpg")
+        img.save(out_path)
+
+        with open(out_path, "rb") as f:
+            bot.send_photo(chat_id, f)
+
+        os.remove(out_path)
+    except Exception as e:
+        bot.send_message(chat_id, "Помилка обробки фото")
 
 
 print("📸 Photo bot запущений...")
